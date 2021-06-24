@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+
+<script type="text/javascript" charset="utf-8">
+    var socket = io();
+    function tableFromJson() {
+        socket.emit('start', {data: 'start script'});
+    };
+    socket.on('dataSpeed', function(message) {
+        var result_of_parsing_json = JSON.parse(message);
+        var elem = document.getElementById("data");
+        console.log(result_of_parsing_json);
+        elem.innerHTML = 'Current speed is ' + result_of_parsing_json.key
+    });
+
+</script>
+
+<div class="d-grid gap-2 col-2 mx-auto">
+  <button class="btn btn-success btn-lg" type="button" onclick="tableFromJson()">START</button>
+</div>
+
+
+<p class="fw-bold" id="data" ></p>
+
+
+
+
+{% endblock %}

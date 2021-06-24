@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+<script type="text/javascript" charset="utf-8">
+    var socket = io();
+    socket.on('connect', function() {
+        socket.emit('my event', {data: 'I\'m connected!'});
+    });
+    socket.on('reply', function(msg) {
+            if( msg.json_body ) {
+            var body = JSON.stringify(msg.json_body);
+            var raw_content = document.querySelector('.raw_content').cloneNode(true);
+            raw_content.innerHTML = '<div class="col-sm"><p class="lh-sm fs-6 text fw-bold">Raw Content</p><pre>' + body +'</pre></div></div>';
+            }else {
+            var body = msg.xml_body.replace(/(\r\n|\n|\r)/gm, "");
+            var raw_content = document.querySelector('.raw_content').cloneNode(true);
+            raw_content.innerHTML = '<div class="col-sm"><p class="lh-sm fs-6 text fw-bold">Raw Content</p><pre><xmp class="lh-sm">' + body +'</xmp></pre></div></div>';
+            }
+            var dmy = moment.utc(msg.date).local().format('L');
+            var hms = moment.utc(msg.date).local().format('LTS');
+            var from_now = moment.utc(msg.date).local().fromNow();
+            var rawId = msg.id;
+            var idcell = '#id';
+            var idstr = 'id';
+            var finalIdcell = idcell.concat(rawId);
+            var finalIdstr = idstr.concat(rawId);
+            var div_left = document.querySelector('.div_left').cloneNode(true);
+            div_left.innerHTML = '<p class="lh-sm"> <span class="font-italic badge bg-success">' + msg.method + '</span> ' + msg.ip +'<br>' + dmy + ' ' + hms + '<br>' + msg.content_type +'</p>';
+            var link = document.querySelector('.link').cloneNode(false);
+            link.setAttribute("data-bs-target", finalIdcell);
+            link.appendChild(div_left);
+            var first_table = document.querySelector('.first_table').cloneNode(true);
+            first_table.innerHTML = '<p class="lh-sm fs-6 text fw-bold">Request Details</p><table class="table table-striped table-sm"><tbody><tr><th scope="row"><span class="badge bg-success font-italic">' + msg.method + '</span></th><td>http://127.0.0.1:5000/get_webhook</td></tr><tr><th scope="row">Host</th><td>' + msg.ip + '</td></tr><tr><th scope="row">Date</th><td>' + dmy + ' ' + hms + '<span class="fst-italic"> (' +from_now + ')</span></td></tr><tr><th scope="row">ID</th><td>' + msg.id + '</td></tr></tbody></table>'
+            var second_table = document.querySelector('.second_table').cloneNode(true);
+            second_table.innerHTML = '<p class="lh-sm fs-6 text fw-bold">Headers</p><table class="table table-striped table-sm"><tbody><tr><th scope="row">auth-login</th><td>' + msg.login + '</td></tr><tr><th scope="row">auth-pass</th><td>' + msg.password + '</td></tr><tr><th scope="row">content-type</th><td>' + msg.content_type + '</td></tr><tr><th scope="row">user-agent</th><td >' + msg.user_agent + '</td></tr></tbody></table>'
+            var table_row = document.querySelector('.table_row').cloneNode(false);
+            table_row.appendChild(first_table);
+            table_row.appendChild(second_table);
+            var div_right = document.querySelector('.div_right').cloneNode(false);
+            div_right.id = finalIdstr;
+            div_right.appendChild(table_row);
+            div_right.appendChild(raw_content);
+            var div_bord_bott = document.querySelector('.bb').cloneNode(false);
+            div_bord_bott.appendChild(link);
+            var div_no_gutters = document.querySelector('.gutt').cloneNode(false);
+            div_no_gutters.appendChild(div_bord_bott);
+            div_no_gutters.appendChild(div_right);
+            var theFirstChild = document.querySelector('.main').firstChild;
+            document.querySelector('.main').insertBefore(div_no_gutters, theFirstChild)
+    });
+
+</script>
+
+
+{%for el in last_request %}
+<div class="container-fluid main">
+    <div class="row no-gutters gutt">
+        <div class="col-sm-2 border-bottom col-color-bg bb">
+            <a class="text-dark text-decoration-none link" data-bs-toggle="collapse" data-bs-target="#id{{el.id}}" role="button" aria-expanded="false"><div class="row div_left"><p class="lh-sm"> <span
+              class="font-italic badge bg-success">{{el.method}}</span> {{el.ip}}<br>{{ moment(el.date).format('L')}}
+          {{ moment(el.date).format('LTS')}}
+          <br>{{el.content_type}}</p></div></a>
+        </div>
+            <div class="col text-dark div_right collapse" id="id{{el.id}}">
+                <div class="row table_row">
+                    <div class="col-sm first_table">
+       <p class="lh-sm fs-6 text fw-bold">Request Details</p>
+       <table class="table table-striped table-sm">
+  <tbody>
+    <tr>
+      <th scope="row"><span class="badge bg-success font-italic">{{el.method}}</span></th>
+      <td>http://127.0.0.1:5000/get_webhook</td>
+    </tr>
+    <tr>
+      <th scope="row">Host</th>
+      <td>{{el.ip}}</td>
+    </tr>
+    <tr>
+      <th scope="row">Date</th>
+      <td>{{ moment(el.date).format('L') }} {{ moment(el.date).format('LTS')}} <span class="fst-italic">({{ moment(el.date).fromNow()}})</span></td>
+    </tr>
+        <tr>
+      <th scope="row">ID</th>
+      <td>{{el.id}}</td>
+    </tr>
+  </tbody>
+</table>
+    </div>
+    <div class="col-sm second_table">
+       <p class="lh-sm fs-6 text fw-bold">Headers</p>
+       <table class="table table-striped table-sm">
+  <tbody>
+        <tr>
+      <th scope="row">auth-login</th>
+      <td>{{el.login}}</td>
+    </tr>
+    <tr>
+      <th scope="row">auth-pass</th>
+      <td >{{el.password}}</td>
+    </tr>
+    <tr>
+      <th scope="row">content-type</th>
+      <td>{{el.content_type}}</td>
+    </tr>
+    <tr>
+      <th scope="row">user-agent</th>
+      <td >{{el.user_agent}}</td>
+    </tr>
+
+  </tbody>
+</table>
+        </div>
+    </div>
+    <div class="row justify-content-center raw_content">
+        <div class="col-sm">
+            <p class="lh-sm fs-6 text fw-bold">Raw Content</p>
+            {%if el.content_type == "application/json" %}
+                <pre>{{el.json_body | tojson}}</pre>
+            {%else%}
+                <pre>{{el.xml_body}}</pre>
+            {% endif %}
+            </div>
+        </div>
+            </div>
+  </div>
+</div>
+</div>
+
+
+{% endfor %}
+
+
+<nav aria-label="...">
+  <ul class="pagination pagination-lg justify-content-center">
+      {% if prev_page %}
+        <li class="page-item"><a class="page-link" href="{{ prev_page }}">Newer requests</a></li>
+      {% else %}
+      <li class="page-item disabled"><a class="page-link" href="#">Newer requests</a></li>
+      {% endif %}
+      {% if next_page %}
+        <li class="page-item"><a class="page-link" href="{{ next_page }}">Older requests</a></li>
+      {% else %}
+      <li class="page-item disabled"><a class="page-link" href="#">Older requests</a></li>
+      {% endif %}
+  </ul>
+</nav>
+
+
+{% endblock %}

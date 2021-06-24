@@ -1,0 +1,74 @@
+{% extends 'base.html'%}
+{% block scripts %}
+    {{ super() }}
+    {{ moment.include_moment() }}
+{% endblock %}
+
+{% block title %}
+{{ req.id }}
+{% endblock %}
+
+
+{% block content %}
+  <div class="container-fluid">
+  <div class="row">
+    <div class="col-sm">
+       <p class="lh-sm fs-6 text fw-bold">Request Details</p>
+       <table class="table table-striped">
+  <tbody>
+    <tr>
+      <th scope="row"><span class="badge bg-success font-italic">{{req.method}}</span></th>
+      <td>http://127.0.0.1:5000/get_webhook</td>
+    </tr>
+    <tr>
+      <th scope="row">Host</th>
+      <td>{{req.ip}}</td>
+    </tr>
+    <tr>
+      <th scope="row">Date</th>
+      <td>{{ moment(req.date).format('L') }} {{ moment(req.date).format('LTS')}} <span class="fst-italic">({{ moment(req.date).fromNow()}})</span></td>
+    </tr>
+        <tr>
+      <th scope="row">ID</th>
+      <td>{{req.id}}</td>
+    </tr>
+  </tbody>
+</table>
+    </div>
+    <div class="col-sm">
+       <p class="lh-sm fs-6 text fw-bold">Headers</p>
+       <table class="table table-striped">
+  <tbody>
+        <tr>
+      <th scope="row">auth-login</th>
+      <td>{{req.login}}</td>
+    </tr>
+    <tr>
+      <th scope="row">auth-pass</th>
+      <td >{{req.password}}</td>
+    </tr>
+    <tr>
+      <th scope="row">content-type</th>
+      <td>{{req.content_type}}</td>
+    </tr>
+    <tr>
+      <th scope="row">user-agent</th>
+      <td >{{req.user_agent}}</td>
+    </tr>
+
+  </tbody>
+</table>
+    </div>
+  </div>
+    <div class="row justify-content-center">
+        <div class="col-sm">
+            <p class="lh-sm fs-6 text fw-bold">Raw Content</p>
+            {%if req.content_type == "application/json" %}
+                <pre>{{req.json_body | tojson}}</pre>
+            {%else%}
+                <pre>{{req.xml_body}}</pre>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
