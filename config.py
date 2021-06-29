@@ -6,7 +6,7 @@ load_dotenv(os.path.join(basedir, '.env'))
 
 
 class Config(object):
-    SQLALCHEMY_DATABASE_URI = 'postgresql://postgres:admin@localhost:5432/webhook'
+    SQLALCHEMY_DATABASE_URI = 'postgresql:///webhook'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     REQUESTS_PER_PAGE = 50
 
